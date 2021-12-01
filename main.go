@@ -6,20 +6,32 @@ import (
 	"github.com/cli/go-gh"
 )
 
+type Response struct {
+	Subject struct {
+		Title string
+		URL   string
+	}
+	Reason string
+}
+
 func main() {
-	fmt.Println("hi world, this is the gh-mentions extension!")
 	client, err := gh.RESTClient(nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	response := struct {Login string}{}
-	err = client.Get("user", &response)
+	response := []Response{}
+	err = client.Get("notifications", &response)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("running as %s\n", response.Login)
+
+	for _, notification := range response {
+		if notification.Reason == "mention" {
+			fmt.Printf("%s %s\n", notification.Subject.Title, notification.Subject.URL)
+		}
+	}
 }
 
 // For more examples of using go-gh, see:
